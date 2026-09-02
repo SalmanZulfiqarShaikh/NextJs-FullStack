@@ -2,53 +2,85 @@ import { connecttoDatabase } from "@/src/dbConfig/dbConfig";
 import User from "@/src/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+const signupSchema = z.object({
+  username: z
+    .string()
+    .trim()
+    .min(3, "Username must be at least 3 characters")
+    .max(20, "Username cannot exceed 20 characters")
+    .regex(
+      /^[a-zA-Z0-9_]+$/,
+      "Username can only contain letters, numbers, and underscores"
+    ),
+
+  email: z
+    .string()
+    .trim()
+    .email("Please enter a valid email address"),
+
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters"),
+});
 
 export async function POST(req: NextRequest) {
   try {
-    // Connect to MongoDB
     await connecttoDatabase();
 
-    // Get request body
     const reqBody = await req.json();
 
-    const { username, email, password } = reqBody;
+    const result = signupSchema.safeParse(reqBody);
 
-    // Validate required fields
-    if (!username || !email || !password) {
+    if (!result.success) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        {
+          error: result.error.issues[0].message,
+        },
         { status: 400 }
       );
     }
 
-    // Check if user already exists
-    const user = await User.findOne({ email });
+    const { username, email, password } = result.data;
+
+    const user = await User.findOne({
+      $or: [
+        { email },
+        { name: username },
+      ],
+    });
 
     if (user) {
-      return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 }
-      );
+      if (user.email === email) {
+        return NextResponse.json(
+          { error: "Email is already registered" },
+          { status: 409 }
+        );
+      }
+
+      if (user.name === username) {
+        return NextResponse.json(
+          { error: "Username is already taken" },
+          { status: 409 }
+        );
+      }
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create new user
-    // Frontend uses "username", database schema uses "name"
     const newUser = new User({
       name: username,
       email,
       password: hashedPassword,
     });
 
-    // Save user to MongoDB
     await newUser.save();
 
     return NextResponse.json(
       {
-        message: "User created successfully",
+        message: "Account created successfully",
       },
       { status: 201 }
     );
