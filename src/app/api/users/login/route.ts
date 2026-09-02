@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     return response;
 
   } catch (error: any) {
-    console.error("🔥 LOGIN ERROR:", error);
+    console.error("LOGIN ERROR:", error);
 
     return NextResponse.json(
       {
