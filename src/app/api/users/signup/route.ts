@@ -3,6 +3,7 @@ import User from "@/src/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { sendEmail, EmailType } from "@/src/helpers/mailer";
 
 const signupSchema = z.object({
   username: z
@@ -77,6 +78,12 @@ export async function POST(req: NextRequest) {
     });
 
     await newUser.save();
+
+    await sendEmail({
+      email: newUser.email,
+      userId: newUser._id.toString(),
+      emailType: EmailType.VERIFY,
+    });
 
     return NextResponse.json(
       {

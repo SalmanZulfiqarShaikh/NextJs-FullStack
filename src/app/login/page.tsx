@@ -10,32 +10,20 @@ import PasswordInput from "@/src/components/PasswordInput";
 
 export default function LoginPage() {
   const router = useRouter();
-
-  const [form, setForm] = useState({
-    identifier: "",
-    password: "",
-  });
-
+  const [form, setForm] = useState({ identifier: "", password: "" });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const response = await axios.post("/api/users/login", form);
-
       toast.success("Login successful");
-
       router.push(
-        `/profile/${response.data.user.id}?name=${encodeURIComponent(
-          response.data.user.username
-        )}`
+        `/profile/${response.data.user.id}?name=${encodeURIComponent(response.data.user.username)}`
       );
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Invalid username or password"
-      );
+      toast.error(error?.response?.data?.message || "Invalid username or password");
     } finally {
       setLoading(false);
     }
@@ -49,27 +37,21 @@ export default function LoginPage() {
       panelTitle="Good to see you again"
       panelCopy="Sign in to keep the conversation going — across messaging, voice and every channel your business relies on."
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            htmlFor="identifier"
-            className="mb-2 block text-sm font-medium text-slate-700"
-          >
+          <label htmlFor="identifier" className="mb-1.5 block text-sm font-medium text-slate-700">
             Username or Email
           </label>
-
           <input
             id="identifier"
             name="identifier"
             type="text"
             autoComplete="username"
             value={form.identifier}
-            onChange={(e) =>
-              setForm({ ...form, identifier: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, identifier: e.target.value })}
             placeholder="Enter your username or email"
             required
-            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-eocean-blue focus:bg-white focus:ring-4 focus:ring-eocean-blue/10"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-[15px] text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-eocean-blue focus:ring-2 focus:ring-eocean-blue/15"
           />
         </div>
 
@@ -86,14 +68,14 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl bg-eocean-blue px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-eocean-blue/25 transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-eocean-blue/30 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.99] sm:text-base"
+          className="mt-2 w-full rounded-lg bg-eocean-blue px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-eocean-blue/40 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.99]"
         >
           {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
 
-      <div className="mt-6 border-t border-slate-100 pt-6 text-center text-sm text-slate-500">
-        Don't have an account?{" "}
+      <div className="mt-6 border-t border-slate-100 pt-5 text-center text-sm text-slate-500">
+        Don&apos;t have an account?{" "}
         <button
           onClick={() => router.push("/signup")}
           className="font-semibold text-eocean-blue transition hover:text-blue-700 hover:underline"
